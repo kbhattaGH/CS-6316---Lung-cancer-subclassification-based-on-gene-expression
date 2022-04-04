@@ -1,1 +1,1 @@
-# CS-6316---Lung-cancer-subclassification-based-on-gene-expression
+# CS6316 Lung Cancer Sub-Classification Using the Tumor Transcriptome
