@@ -9,7 +9,7 @@ def assign_labels(classes):
     true_label = pd.DataFrame(columns=column_names)
 
     for c in classes:
-        file_path = "../../" + c + "_mfile.txt"
+        file_path = "../metadata/" + c + "_mfile.txt"
         df = pd.read_csv(file_path, usecols=["id"], sep="\t")
         df["label"] = c
         true_label = true_label.append(df, ignore_index=True)
