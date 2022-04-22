@@ -50,7 +50,7 @@ def main(type):
     if type == "train":
         meta = "../data/train_labels.csv"
     elif type == "test":
-        meta = "../data/train_labels.csv"
+        meta = "../data/test_labels.csv"
     # get the list of samples of train or test set
     list = pd.read_csv(meta, usecols=["id"])
     list = list["id"].tolist()
@@ -75,6 +75,7 @@ def main(type):
                         [features, extract_features(f)], axis=0, ignore_index=True
                     )
                     count += 1
+                    print(count)
     features = features.fillna(0)
     features.to_csv(os.path.join("..", "data", type + "_features.csv"), index=False)
 
