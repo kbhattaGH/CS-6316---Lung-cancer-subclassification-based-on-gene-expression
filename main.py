@@ -2,7 +2,7 @@ import sklearn as sk
 import pandas as pd
 import sys
 import os
-import numpy as np
+import matplotlib.pyplot as plot
 
 
 class CancerClassifier:
@@ -38,9 +38,11 @@ class CancerClassifier:
         return cls, train_score
 
     def test_and_graph_results(self, cls, X_Test, Y_Test):
-        X_predicted = cls.predict(X_Test)
-        X_predicted_score = cls.score(X_Test, Y_Test)
-        return X_predicted_score
+        Y_predicted = cls.predict(X_Test)
+        Y_predicted_score = cls.score(X_Test, Y_Test)
+        plot.scatter(X_Test[:,0], X_Test[:,9], c=Y_predicted)
+        plot.show()
+        return Y_predicted_score, Y_predicted
 
 if __name__ == "__main__":
 
@@ -64,8 +66,9 @@ if __name__ == "__main__":
     cfier = CancerClassifier(gamma=10, data=data_reduced)
     X_Train, X_Test, Y_Train, Y_Test = cfier.process_data()
     cls, train_score = cfier.train_classifier(X_Train, Y_Train.ravel())
-    X_predicted_score = cfier.test_and_graph_results(cls, X_Test, Y_Test.ravel())
-    print(X_predicted_score)
+    Y_predicted_score,  Y_predicted = cfier.test_and_graph_results(cls, X_Test, Y_Test.ravel())
+    print(Y_predicted)
+    print(Y_predicted_score)
 
 
 
