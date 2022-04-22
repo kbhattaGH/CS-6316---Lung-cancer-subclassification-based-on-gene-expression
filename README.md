@@ -18,7 +18,7 @@ gdc-client download -m ../../metadata/adenomas_and_adenocarcinomas_mfile.txt
 ```
 ## Generat and Split True Lable Table into Train and Test Sets
 ```
-python3 extract_true_label.py
+python3 extract_true_label.py squamous_cell_neoplasms adenomas_and_adenocarcinomas
 ```
 ## Generat Feature Matrix for Train and Test Sets
 The feature matrix contains samples as rows and features (genes) as column. The FPKM score from the input transcriptome profiling files are used as the feature score
