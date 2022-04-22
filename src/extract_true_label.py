@@ -4,13 +4,27 @@ import pandas as pd
 
 
 def assign_labels(classes):
+    """
+    generate ture label table with the given classifiers (dir name)
 
+    param
+    ----------
+        classes: list of classifiers
+    return
+    ----------
+        tru_label: dataframe of samples with assigned labels
+    """
+
+    # init dataframe
     column_names = ["id", "label"]
     true_label = pd.DataFrame(columns=column_names)
 
+    # for each classifiers
     for c in classes:
         file_path = "../metadata/" + c + "_mfile.txt"
+        # get the sample names in corrisponding manifest file
         df = pd.read_csv(file_path, usecols=["id"], sep="\t")
+        # assign label
         df["label"] = c
         true_label = true_label.append(df, ignore_index=True)
 
@@ -18,6 +32,17 @@ def assign_labels(classes):
 
 
 def train_test_split(df, trainratio):
+    """
+    randomly split the sample into train and test
+    with given train ratio
+    save the train/test ture_label table in a file
+
+    params
+    -------
+        df: dataframe of samples with the true labels
+        trainratio: percent of the training set
+
+    """
 
     # Creating the train with given train_ratio
     train = df.sample(frac=trainratio)
@@ -28,10 +53,20 @@ def train_test_split(df, trainratio):
 
 
 def main(class1, class2, trainratio):
+    """
+    generate true label tables for train and test sets
+
+    input data (samples) are saved in different dir
+    named by the classifiers (true labels)
+
+    the train/test sets are split with given train ratio
+
+    """
 
     classes = [class1, class2]
-
+    # generate true label table for all samples
     true_label = assign_labels(classes)
+    # split the table into train and test
     train_test_split(true_label, trainratio)
 
 
