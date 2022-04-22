@@ -38,7 +38,6 @@ def main(type):
     generate feature matrix:
         row: samples
         col: feature score (fpkm score)
-
     saved as csv file
 
     param
@@ -76,6 +75,7 @@ def main(type):
                         [features, extract_features(f)], axis=0, ignore_index=True
                     )
                     count += 1
+    features = features.fillna(0)
     features.to_csv(os.path.join("..", "data", type + "_features.csv"), index=False)
 
 
