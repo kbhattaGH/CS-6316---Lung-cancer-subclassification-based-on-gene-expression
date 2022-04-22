@@ -7,12 +7,13 @@ import pandas as pd
 import sys
 import os
 
-#
+
 class CancerClassifier:
-    def __init__(self, gamma, data, components=1000):
+    def __init__(self, gamma, data, components=1000, test_size=0.33):
         self.gamma = gamma
         self.components = components
         self.data = data
+        self.test_size = test_size
 
     # def process_data(self):
     #     #import data from processed file and extract required meta-data and train-tes split
@@ -28,9 +29,15 @@ class CancerClassifier:
     #
     #     return X_Train, Y_Train, X_Test, Y_Test
 
+    def process_data(self):
+        features = self.data.drop(columns=['label'])
+        labels = self.data[['label']]
+        OHE_labels = labels.where(labels!="adenomas_and_adenocarcinomas",other=1)
+        OHE_labels = OHE_labels.where(labels=="adenomas_and_adenocarcinomas",other=0)
+        X_Train, X_Test, Y_Train, Y_Test = sk.model_selection.train_test_split(features, OHE_labels, test_size=self.test_size)
+        return X_Train, X_Test, Y_Train, Y_Test
 
-
-    def train_classifier(self):
+    def train_classifier(self, X_Train, Y_Train):
 
         cls = sk.svm.SVC(gamma=self.gamma)
         cls.fit(X_Train, Y_Train)
@@ -40,18 +47,38 @@ class CancerClassifier:
     def test_and_graph_results(self, cls, X_Test, Y_Test):
         X_predicted = cls.predict(X_Test)
         X_predicted_score = cls.score(X_predicted, Y_Test)
-# #
+        return X_predicted_score
 
 if __name__ == "__main__":
+
+    ####IMPORT DATA AND FUNCTIONS#####
     abspath = sys.path[0]
+    src_path = os.path.abspath(os.path.join(abspath, 'src'))
+    sys.path.append(src_path)
+    from dimensionality_reduction import pca_reduce
+
     data_path = os.path.join(abspath, 'data')
-    features = pd.read_csv(data_path+'/demo_feature_file.csv', sep=',', index_col=0)
-    labels = pd.read_csv(data_path+'/demo.csv', sep=',', index_col=0)
-    data = (pd.concat([features, labels], axis=1)).reset_index()
-        #cfier = CancerClassifier(f1, gamma=50, split=[80,20])
-        #data = cfier.process_data()
-    print(data.keys())
-    print (data[['index','label']])
+    feature_data = pd.read_csv(data_path+'/demo_feature_file.csv')
+
+    feature_data.rename(columns={'samples': 'id'}, inplace=True)
+
+    # read in labels
+    labels = pd.read_csv(data_path+"/demo.csv")
+
+    # join on id
+    data_labeled = feature_data.merge(labels, on="id", how="inner")
+    data_reduced = pca_reduce(data_labeled, n_components=10)
+
+    print(data_reduced)
+
+    # Classifier
+    cfier = CancerClassifier(gamma=10, data=data_reduced, components=1000)
+    X_Train, X_Test, Y_Train, Y_Test = cfier.process_data()
+    cls, train_score = cfier.train_classifier(X_Train, Y_Train)
+    X_predicted_score = cfier.test_and_graph_results(cls, X_Test, Y_Test)
+
+
+
 
 
 
