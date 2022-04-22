@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+"""
+    usage:
+        extract_true_label [options] class1, class2
+    where the options are:
+        -h,--help : print usage and quit
+        -r,--trainratio: ratio for split trani set
+"""
+
 from sys import argv, stderr
 from getopt import getopt, GetoptError
 import pandas as pd
@@ -75,28 +85,22 @@ if __name__ == "__main__":
         opts, args = getopt(
             argv[1:],
             "hm:x:g:e:",
-            ["help", "class1=", "class2=", "trainratio="],
+            ["help", "trainratio="],
         )
     except GetoptError as err:
         print(err)
         print(__doc__, file=stderr)
         exit(1)
 
-    class1 = "squamous_cell_neoplasms"
-    class2 = "adenomas_and_adenocarcinomas"
     trainratio = 0.8
 
     for o, a in opts:
         if o in ("-h", "--help"):
             print(__doc__, file=stderr)
             exit()
-        elif o in ("-c1", "--class1"):
-            class1 = str(a)
-        elif o in ("-c1", "--class2"):
-            class2 = str(a)
         elif o in ("-r", "--trainratio"):
             trainratio = float(a)
         else:
             assert False, "unhandled option"
 
-    main(class1, class2, trainratio)
+    main(args[0], args[1], trainratio)
