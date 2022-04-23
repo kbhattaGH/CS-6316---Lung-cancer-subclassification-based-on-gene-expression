@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
 def pca_reduce(
     data: pd.DataFrame, 
@@ -28,7 +29,11 @@ def pca_reduce(
 
     # init PCA object and fit
     pca = PCA(n_components=n_components)
-    pca.fit(data_no_samples)
+    SS = StandardScaler(copy=True, with_mean=True, with_std=True)
+    SS.fit(data_no_samples)
+    data_scaled = SS.transform(data_no_samples)
+
+    pca.fit(data_scaled)
 
     # log out the results
     print(
@@ -36,7 +41,7 @@ def pca_reduce(
     )
 
     # run the reduction
-    dim_reduced = pca.transform(data_no_samples)
+    dim_reduced = pca.transform(data_scaled)
 
     # rebuild a dataframe
     cols = [f"PCA{i+1}" for i in range(n_components)]
