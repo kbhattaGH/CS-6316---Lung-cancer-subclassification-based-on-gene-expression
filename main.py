@@ -47,31 +47,46 @@ class CancerClassifier:
         return Y_predicted_score, Y_predicted
 
 if __name__ == "__main__":
-
+    print("Begin.")
     # Import Data and Functions
     abspath = sys.path[0]
     src_path = os.path.abspath(os.path.join(abspath, 'src'))
     sys.path.append(src_path)
-    from dimensionality_reduction import pca_reduce
+    from dimensionality_reduction import pca_reduce, plot_pca
+
+    print("Reading data.")
     data_path = os.path.join(abspath, 'data')
-    feature_data1 = pd.read_csv(data_path+'/train_features.csv')
-    feature_data2 = pd.read_csv(data_path+'/test_features.csv')
+    feature_data1 = pd.read_csv(data_path+'/full/train_features.csv')
+    feature_data2 = pd.read_csv(data_path+'/full/test_features.csv')
     data_labeled = pd.concat([feature_data1, feature_data2], ignore_index=True)
     data_labeled.rename(columns={'samples': 'id'}, inplace=True)
 
 
     # Reduced data
-    data_reduced = pca_reduce(data_labeled, n_components=1200)
-    print(data_reduced)
+    print("Running dimensionality reduction.")
+    data_reduced_pca = pca_reduce(data_labeled, n_components=1200)
+    # print(data_reduced)
+    plot_pca(data_reduced_pca)
+    print("PCA done.")
 
     # Classifier
-    cfier = CancerClassifier(gamma=10**-5, C=1, data=data_reduced)
+    print("Building classifier.")
+    cfier = CancerClassifier(
+        gamma=10**-5, 
+        C=1, 
+        data=data_reduced_pca
+    )
     X_Train, X_Test, Y_Train, Y_Test = cfier.process_data()
+
+    print("Training.")
     cls, train_score = cfier.train_classifier(X_Train, Y_Train.ravel())
+
+    print("Testing.")
     Y_predicted_score,  Y_predicted = cfier.test_and_graph_results(cls, X_Test, Y_Test.ravel())
-    print(train_score)
-    print(Y_predicted)
-    print(Y_predicted_score)
+
+    print(f"Training accuracy: {round(train_score*100,2)}%")
+    # print(Y_predicted)
+    print(f"Testing accuracy: {round(Y_predicted_score*100,2)}%")
 
 
 

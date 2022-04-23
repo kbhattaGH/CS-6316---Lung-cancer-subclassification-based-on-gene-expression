@@ -1,8 +1,10 @@
+from asyncore import close_all
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
 
 def pca_reduce(
     data: pd.DataFrame, 
@@ -74,6 +76,69 @@ def plot_pca(
     )
     plt.show()
 
+def tSNE_reduce(
+    data: pd.DataFrame, 
+    n_components: int = 2,
+    label_col_name: str = 'label',
+    remove_sample_col = True
+) -> pd.DataFrame:
+    """
+    # tSNE Reduce
+    This is similar to the PCA reduction function, however, this one uses
+    a more advanced tSNE approach. It usually takes longer to do this, but
+    can often yield better results. 
+    
+    This again assumes that the sample id column is the first column in
+    the dataframe.
+    """
+    _labels = data[label_col_name]
+    del data[label_col_name]
+
+    # drop the samples column
+    if remove_sample_col:
+        data_no_samples = data.iloc[:,1:]
+    else:
+        data_no_samples = data
+    
+    # fit data to tSNE
+    tSNE_data = TSNE(
+        n_components=n_components,
+        learning_rate='auto',
+        init='random'
+    ).fit_transform(data_no_samples)
+
+    # build columns back and regenerate data frame
+    cols = [f"tSNE{i+1}" for i in range(n_components)]
+    data_reduced = pd.DataFrame(
+        data=tSNE_data,
+        columns=cols
+    )
+    data_reduced[label_col_name] = _labels
+
+    return data_reduced
+
+def plot_tSNE(
+    data: pd.DataFrame,
+    x: str = "tSNE1",
+    y: str = "tSNE2",
+    label_col: str = 'label'
+) -> None:
+    """
+    # Plot tSNE
+    This function is similar to the plot PCA function and
+    is intended to plot the results of the tSNE_reduce
+    function.
+    """
+    _, ax = plt.subplots(1,1)
+    sns.scatterplot(
+        data=data,
+        x=x,
+        y=y,
+        ax=ax,
+        hue=label_col
+    )
+    plt.show()
+
 
 #
 # TEST CODE
@@ -91,3 +156,19 @@ if __name__ == '__main__':
 
     data_reduced = pca_reduce(data_labeled, n_components=10)
     plot_pca(data_reduced)
+
+
+
+
+    # run tSNE
+    feature_data = pd.read_csv("data/demo_feature_file.csv")
+    feature_data.rename(columns={'samples': 'id'}, inplace=True)
+
+    # read in labels
+    labels = pd.read_csv("data/demo.csv")
+
+    # join on id
+    data_labeled = feature_data.merge(labels, on="id", how="inner")
+
+    data_reduced = tSNE_reduce(data_labeled, n_components=2)
+    plot_tSNE(data_reduced)
