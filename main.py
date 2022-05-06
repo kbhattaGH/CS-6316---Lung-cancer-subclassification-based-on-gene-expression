@@ -3,14 +3,18 @@ import pandas as pd
 import sys
 import os
 import matplotlib.pyplot as plot
+import numpy as np
 
 
 class CancerClassifier:
-    def __init__(self, gamma, C, data, test_size=0.33):
-        self.gamma = gamma
+    def __init__(self, parameters, data, test_size=0.33, search_best_val=True):
+        self.search_best_val = search_best_val
+        self.parameters = parameters
+        self.gamma = self.parameters["gamma"][0]
         self.data = data
         self.test_size = test_size
-        self.C = C
+        self.C = self.parameters["C"][0]
+        self.kernel = self.parameters["kernel"][0]
 
     def process_data(self):
         # Extract Features
@@ -23,7 +27,6 @@ class CancerClassifier:
         OHE_labels = labels.where(labels!="adenomas_and_adenocarcinomas", other=1)
         OHE_labels = OHE_labels.where(labels=="adenomas_and_adenocarcinomas", other=0)
 
-
         #Train Test SPlit
         X_Train, X_Test, Y_Train, Y_Test = sk.model_selection.train_test_split(features, OHE_labels, test_size=self.test_size)
         X_Train = X_Train.to_numpy(dtype=float)
@@ -33,8 +36,21 @@ class CancerClassifier:
 
         return X_Train, X_Test, Y_Train, Y_Test
 
-    def train_classifier(self, X_Train, Y_Train):
-        cls = sk.svm.SVC(C=self.C, gamma=self.gamma)
+    def train_classifier(self, X_Train, Y_Train, X_Test, Y_Test):
+
+        if self.search_best_val == True:
+            print("Searching for the best hyper-parameters")
+            cls_init = sk.svm.SVC()
+
+
+            cls = sk.model_selection.GridSearchCV(cls_init, self.parameters, verbose=True, n_jobs=-1)
+
+            cls.fit(np.concatenate((X_Train, X_Test), axis=0), np.concatenate((Y_Train, Y_Test), axis=0).ravel())
+
+            self.kernel, self.C, self.gamma = cls.best_params_["kernel"], cls.best_params_["C"], cls.best_params_["gamma"]
+            print("The best parameters for the problem are: \n", pd.DataFrame(cls.best_params_, index=["Parameters"]))
+
+        cls = sk.svm.SVC(kernel=self.kernel, C=self.C, gamma=self.gamma)
         cls.fit(X_Train, Y_Train.ravel())
         train_score = cls.score(X_Train, Y_Train.ravel())
         return cls, train_score
@@ -69,17 +85,15 @@ if __name__ == "__main__":
     plot_pca(data_reduced_pca)
     print("PCA done.")
 
-    # Classifier
+
+    # Classifier hyperparameter tuning
     print("Building classifier.")
-    cfier = CancerClassifier(
-        gamma=10**-5, 
-        C=1, 
-        data=data_reduced_pca
-    )
+    params = {"kernel": ["linear", "rbf"], "C": [0.1, 0.5, 1, 1.5], "gamma": [10 ** -5, 10 ** -4, 10 ** -2]}
+    cfier = CancerClassifier(parameters=params, data=data_reduced_pca)
     X_Train, X_Test, Y_Train, Y_Test = cfier.process_data()
 
     print("Training.")
-    cls, train_score = cfier.train_classifier(X_Train, Y_Train.ravel())
+    cls, train_score = cfier.train_classifier(X_Train, Y_Train.ravel(), X_Test, Y_Test.ravel())
 
     print("Testing.")
     Y_predicted_score,  Y_predicted = cfier.test_and_graph_results(cls, X_Test, Y_Test.ravel())
