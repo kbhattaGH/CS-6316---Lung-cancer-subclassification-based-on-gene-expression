@@ -119,7 +119,8 @@ def tSNE_reduce(
 
 def pca_bar(
     data: np.ndarray,
-    n_components: int = None
+    n_components: int = None,
+    print_labels: bool = True
 ) -> None:
     # they didnt specify
     if n_components is None:
@@ -135,7 +136,7 @@ def pca_bar(
         N = n_components
 
     # tranform to percentages
-    data = np.round(data,4)*100
+    data = (np.round(data,4)*100)[:N]
 
     _labels = [f"PC{i+1}" for i in range(N)]
 
@@ -147,10 +148,17 @@ def pca_bar(
         ax=ax
     )
 
-    ax.set_title(f"Explained variance in first {N} Principle Components\nTotal = {sum(data)}%")
+    ax.set_title(f"Explained variance in first {N} Principle Components\nTotal = {round(sum(data),2)}%")
     ax.set_xlabel("Component")
     ax.set_ylabel("Explain Variance (%)")
-    ax.bar_label(ax.containers[0])
+
+    if print_labels:
+        ax.bar_label(ax.containers[0])
+    
+    # if there are too many PC's
+    if N > 20:
+        ax.set_xticklabels([])
+
     plt.show()
 
 def plot_tSNE(
