@@ -149,7 +149,7 @@ def pca_bar(
     )
 
     ax.set_title(f"Explained variance in first {N} Principle Components\nTotal = {round(sum(data),2)}%")
-    ax.set_xlabel("Component")
+    ax.set_xlabel("Component #")
     ax.set_ylabel("Explain Variance (%)")
 
     if print_labels:
