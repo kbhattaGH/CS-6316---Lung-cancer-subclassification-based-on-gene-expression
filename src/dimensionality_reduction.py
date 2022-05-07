@@ -1,4 +1,4 @@
-from asyncore import close_all
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -52,7 +52,7 @@ def pca_reduce(
     # add labels back
     df_reduced[label_col_name] = _labels
 
-    return df_reduced
+    return [df_reduced, pca.explained_variance_ratio_]
 
 def plot_pca(
     data: pd.DataFrame, 
@@ -117,6 +117,42 @@ def tSNE_reduce(
 
     return data_reduced
 
+def pca_bar(
+    data: np.ndarray,
+    n_components: int = None
+) -> None:
+    # they didnt specify
+    if n_components is None:
+        print(f"Creating bar with all components (n={len(data)})")
+        N = len(data)
+    # they specified, but it was too many
+    elif n_components > len(data):
+        print(f"Request number of components ({n_components}) is greater than length of array provided ({len(data)})")
+        print(f"Using entire array instead... ")
+        N = len(data)
+    # they got it right :)
+    else:
+        N = n_components
+
+    # tranform to percentages
+    data = np.round(data,4)*100
+
+    _labels = [f"PC{i+1}" for i in range(N)]
+
+    _, ax = plt.subplots(1,1)
+    sns.barplot(
+        y=data,
+        x=_labels,
+        color="b",
+        ax=ax
+    )
+
+    ax.set_title(f"Explained variance in first {N} Principle Components\nTotal = {sum(data)}%")
+    ax.set_xlabel("Component")
+    ax.set_ylabel("Explain Variance (%)")
+    ax.bar_label(ax.containers[0])
+    plt.show()
+
 def plot_tSNE(
     data: pd.DataFrame,
     x: str = "tSNE1",
@@ -154,21 +190,22 @@ if __name__ == '__main__':
     # join on id
     data_labeled = feature_data.merge(labels, on="id", how="inner")
 
-    data_reduced = pca_reduce(data_labeled, n_components=10)
+    data_reduced, explained_variance = pca_reduce(data_labeled, n_components=10)
     plot_pca(data_reduced)
+    pca_bar(
+        explained_variance,
+        n_components=10
+    )
 
+    # # run tSNE
+    # feature_data = pd.read_csv("data/demo_feature_file.csv")
+    # feature_data.rename(columns={'samples': 'id'}, inplace=True)
 
+    # # read in labels
+    # labels = pd.read_csv("data/demo.csv")
 
+    # # join on id
+    # data_labeled = feature_data.merge(labels, on="id", how="inner")
 
-    # run tSNE
-    feature_data = pd.read_csv("data/demo_feature_file.csv")
-    feature_data.rename(columns={'samples': 'id'}, inplace=True)
-
-    # read in labels
-    labels = pd.read_csv("data/demo.csv")
-
-    # join on id
-    data_labeled = feature_data.merge(labels, on="id", how="inner")
-
-    data_reduced = tSNE_reduce(data_labeled, n_components=2)
-    plot_tSNE(data_reduced)
+    # data_reduced = tSNE_reduce(data_labeled, n_components=2)
+    # plot_tSNE(data_reduced)
