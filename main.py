@@ -60,7 +60,7 @@ class CancerClassifier:
         scatter = plot.scatter(X_Test[:,1], X_Test[:,2], c=Y_predicted)
         plot.xlabel("PCA1")
         plot.ylabel("PCA2")
-        plot.legend(handles=scatter.legend_elements()[0])
+        plot.legend(handles=scatter.legend_elements()[0], labels=["Adenomas and Carcinomas","Squamous Cell Neoplasms"])
         plot.show()
         return Y_predicted_score, Y_predicted
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     plot_pca(data_reduced_pca)
     pca_bar(
         explained_variance,
-        n_components=100,
+        n_components=10,
         print_labels=False
     )
     print("PCA done.")
