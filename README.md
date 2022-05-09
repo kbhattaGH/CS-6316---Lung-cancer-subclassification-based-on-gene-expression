@@ -34,7 +34,7 @@ python3 generate_featrue_matrix.py test
 2. pca_reduce function arguments required: 
 ```
 ** n_components ** Number of PCA components
-**Data** Data to reduce
+** Data ** Data to reduce
 
 ```
 4. CancerClassifier Method Arguments required: 
