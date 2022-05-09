@@ -28,3 +28,24 @@ python3 generate_featrue_matrix.py train
 python3 generate_featrue_matrix.py test
 ```
 
+##Running Program
+
+1. Move pre-processed data into the "data/full" directory.
+2. pca_reduce function arguments required: 
+```
+**n_components** Number of PCA components
+**Data** Data to reduce
+
+```
+4. CancerClassifier Method Arguments required: 
+
+```
+**parameters** Dictionary of hyper parameters for tuning
+
+**data** Data with sample id and gene expression scores
+
+**test_size** Test:Train split ratio
+
+**search_best_val** boolean for turning on hyperparameter tuning. If false uses first value of each hyperparameter in parameter dict.
+
+```
