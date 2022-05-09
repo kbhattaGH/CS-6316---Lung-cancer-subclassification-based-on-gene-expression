@@ -5,7 +5,6 @@ import os
 import matplotlib.pyplot as plot
 import numpy as np
 
-
 class CancerClassifier:
     def __init__(self, parameters, data, test_size=0.33, search_best_val=True):
         self.search_best_val = search_best_val
@@ -71,7 +70,7 @@ if __name__ == "__main__":
     abspath = sys.path[0]
     src_path = os.path.abspath(os.path.join(abspath, 'src'))
     sys.path.append(src_path)
-    from dimensionality_reduction import pca_reduce, plot_pca
+    from dimensionality_reduction import pca_reduce, plot_pca, pca_bar
 
     print("Reading data.")
     data_path = os.path.join(abspath, 'data')
@@ -83,9 +82,14 @@ if __name__ == "__main__":
 
     # Reduced data
     print("Running dimensionality reduction.")
-    data_reduced_pca = pca_reduce(data_labeled, n_components=1200)
-    # print(data_reduced)
+    data_reduced_pca, explained_variance = pca_reduce(data_labeled, n_components=1200)
+
     plot_pca(data_reduced_pca)
+    pca_bar(
+        explained_variance,
+        n_components=100,
+        print_labels=False
+    )
     print("PCA done.")
 
 
