@@ -58,7 +58,10 @@ class CancerClassifier:
     def test_and_graph_results(self, cls, X_Test, Y_Test):
         Y_predicted = cls.predict(X_Test)
         Y_predicted_score = cls.score(X_Test, Y_Test.ravel())
-        plot.scatter(X_Test[:,1], X_Test[:,2], c=Y_predicted)
+        scatter = plot.scatter(X_Test[:,1], X_Test[:,2], c=Y_predicted)
+        plot.xlabel("PCA1")
+        plot.ylabel("PCA2")
+        plot.legend(handles=scatter.legend_elements()[0])
         plot.show()
         return Y_predicted_score, Y_predicted
 
